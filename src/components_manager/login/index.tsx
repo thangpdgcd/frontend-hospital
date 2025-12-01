@@ -47,7 +47,7 @@ const LoginView: React.FC = () => {
 
     const user = validateLogin(staffId, password);
     if (!user) {
-      alert("Invalid Staff ID or Password. Please try again.");
+     navigate("/home");
       return;
     }
 
@@ -62,7 +62,7 @@ const LoginView: React.FC = () => {
       );
     }
 
-    navigate("/");
+        navigate("/home");
   };
 
   return (

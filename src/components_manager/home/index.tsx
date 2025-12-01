@@ -1,7 +1,13 @@
-// src/pages/HomeView.tsx (unchanged)
+// src/pages/HomeView.tsx
 import React, { useEffect, useState } from "react";
 import "./index.scss";
+import DoctorPerformanceModal from "../doctorperformance/index";
+import type {
+  DoctorSummary,
+  WorkloadStatus,
+} from "../doctorperformance/index";
 
+// ===== TYPES CHO PHẦN STATUS / SCHEDULE =====
 type ShiftType = "Morning" | "Evening" | "Night";
 type StaffState = "Active" | "Late" | "NotClocked";
 
@@ -24,7 +30,7 @@ type ShiftSchedule = {
   staffInitials: string;
   department: string;
   date: string; // 2025-11-24
-  shiftType: ShiftType; // Morning | Evening | Night
+  shiftType: ShiftType;
   scheduledTime: string; // 14:00 - 22:00
   actualTime?: string;
   status: "Pending" | "Validated" | "Completed";
@@ -33,6 +39,7 @@ type ShiftSchedule = {
   notes?: string;
 };
 
+// ===== DATA STATUS / SCHEDULE =====
 const workingStaff: Staff[] = [
   {
     id: "1",
@@ -58,7 +65,7 @@ const workingStaff: Staff[] = [
   },
   {
     id: "3",
-    name: "Dr. Sarah Johnson",
+    name: "Sarah Johnson",
     initials: "SJ",
     role: "Emergency Nurse",
     department: "Emergency",
@@ -75,23 +82,31 @@ const workingStaff: Staff[] = [
     department: "Emergency",
     shift: "Morning",
     shiftTime: "08:00 - 16:00",
-    status: "Active",
-    statusNote: "Started 7h 0m ago",
-  },
-  {
-    id: "5",
-    name: "Dr. Lisa Martinez",
-    initials: "LM",
-    role: "Pediatrician",
-    department: "Pediatrics",
-    shift: "Morning",
-    shiftTime: "08:00 - 16:00",
     status: "Late",
     statusNote: "Clocked in at 08:20",
   },
+  {
+    id: "5",
+    name: "Dr. Emily Watson",
+    initials: "EW",
+    role: "Emergency Physician",
+    department: "Emergency",
+    shift: "Night",
+    shiftTime: "22:00 - 06:00",
+    status: "NotClocked",
+  },
+  {
+    id: "6",
+    name: "Maria Garcia",
+    initials: "MG",
+    role: "ICU Nurse",
+    department: "ICU",
+    shift: "Night",
+    shiftTime: "22:00 - 06:00",
+    status: "NotClocked",
+  },
 ];
 
-// dữ liệu mẫu ban đầu cho lịch (dùng để khởi tạo state khi chưa publish)
 const initialScheduleData: ShiftSchedule[] = [
   {
     id: "s1",
@@ -198,9 +213,215 @@ const initialScheduleData: ShiftSchedule[] = [
   },
 ];
 
-const TOTAL_STAFF = 6;
-const ACTIVE_STAFF = 4;
-const NOT_STARTED = 2;
+// ===== DATA PERFORMANCE (sử dụng DoctorSummary từ doctorperformance) =====
+const doctorPerformanceData: DoctorSummary[] = [
+  {
+    id: "1",
+    name: "Dr. Michael Roberts",
+    role: "Cardiologist",
+    department: "Cardiology",
+    code: "E001",
+    dailyRatio: 0.25,
+    weeklyRatio: 0.27,
+    monthlyRatio: 0.26,
+    dailyHours: 7.5,
+    dailyPatients: 30,
+    weeklyHours: 40,
+    weeklyPatients: 148,
+    hoursWorked: 168,
+    patientsTreated: 646,
+    activeAlerts: 0,
+    requestsCount: 2,
+    workload: "normal",
+  },
+  {
+    id: "2",
+    name: "Dr. Emily Watson",
+    role: "Emergency Physician",
+    department: "Emergency",
+    code: "E002",
+    dailyRatio: 0.22,
+    weeklyRatio: 0.23,
+    monthlyRatio: 0.22,
+    dailyHours: 7.0,
+    dailyPatients: 32,
+    weeklyHours: 42,
+    weeklyPatients: 150,
+    hoursWorked: 176,
+    patientsTreated: 640,
+    activeAlerts: 2,
+    requestsCount: 4,
+    workload: "overworked",
+    workloadNote: "16h / 168h (+2h over) Above recommended load",
+  },
+  {
+    id: "3",
+    name: "Dr. James Anderson",
+    role: "ICU Specialist",
+    department: "ICU",
+    code: "E003",
+    dailyRatio: 0.3,
+    weeklyRatio: 0.32,
+    monthlyRatio: 0.31,
+    dailyHours: 7.5,
+    dailyPatients: 25,
+    weeklyHours: 40,
+    weeklyPatients: 130,
+    hoursWorked: 170,
+    patientsTreated: 552,
+    activeAlerts: 3,
+    requestsCount: 6,
+    workload: "overworked",
+    workloadNote: "18h / 168h (+10h over) Exceeding monthly baseline",
+  },
+  {
+    id: "4",
+    name: "Dr. Lisa Martinez",
+    role: "Pediatrician",
+    department: "Pediatrics",
+    code: "E004",
+    dailyRatio: 0.28,
+    weeklyRatio: 0.29,
+    monthlyRatio: 0.28,
+    dailyHours: 7.0,
+    dailyPatients: 27,
+    weeklyHours: 38,
+    weeklyPatients: 140,
+    hoursWorked: 160,
+    patientsTreated: 580,
+    activeAlerts: 1,
+    requestsCount: 3,
+    workload: "underworked",
+    workloadNote: "144h / 168h (-24h short) Below minimum monthly hours",
+  },
+  {
+    id: "5",
+    name: "Dr. David Kim",
+    role: "Neurologist",
+    department: "Neurology",
+    code: "E005",
+    dailyRatio: 0.26,
+    weeklyRatio: 0.25,
+    monthlyRatio: 0.26,
+    dailyHours: 7.2,
+    dailyPatients: 29,
+    weeklyHours: 39,
+    weeklyPatients: 146,
+    hoursWorked: 170,
+    patientsTreated: 655,
+    activeAlerts: 0,
+    requestsCount: 2,
+    workload: "normal",
+  },
+  {
+    id: "6",
+    name: "Dr. Rachel Green",
+    role: "Surgeon",
+    department: "Surgery",
+    code: "E006",
+    dailyRatio: 0.24,
+    weeklyRatio: 0.24,
+    monthlyRatio: 0.24,
+    dailyHours: 7.0,
+    dailyPatients: 28,
+    weeklyHours: 40,
+    weeklyPatients: 145,
+    hoursWorked: 160,
+    patientsTreated: 640,
+    activeAlerts: 0,
+    requestsCount: 4,
+    workload: "normal",
+  },
+  {
+    id: "7",
+    name: "Sarah Johnson",
+    role: "Emergency Nurse",
+    department: "Emergency",
+    code: "E007",
+    dailyRatio: 0.21,
+    weeklyRatio: 0.2,
+    monthlyRatio: 0.21,
+    dailyHours: 7.2,
+    dailyPatients: 31,
+    weeklyHours: 39,
+    weeklyPatients: 139,
+    hoursWorked: 160,
+    patientsTreated: 571,
+    activeAlerts: 0,
+    requestsCount: 2,
+    workload: "normal",
+  },
+  {
+    id: "8",
+    name: "Maria Garcia",
+    role: "ICU Nurse",
+    department: "ICU",
+    code: "E008",
+    dailyRatio: 0.23,
+    weeklyRatio: 0.22,
+    monthlyRatio: 0.23,
+    dailyHours: 7.0,
+    dailyPatients: 30,
+    weeklyHours: 38,
+    weeklyPatients: 143,
+    hoursWorked: 148,
+    patientsTreated: 640,
+    activeAlerts: 1,
+    requestsCount: 2,
+    workload: "underworked",
+    workloadNote: "148h / 168h (-20h short) Below department average hours",
+  },
+  {
+    id: "9",
+    name: "Tom Wilson",
+    role: "Care Assistant",
+    department: "General Care",
+    code: "E009",
+    dailyRatio: 0.27,
+    weeklyRatio: 0.28,
+    monthlyRatio: 0.27,
+    dailyHours: 7.1,
+    dailyPatients: 28,
+    weeklyHours: 39,
+    weeklyPatients: 142,
+    hoursWorked: 162,
+    patientsTreated: 600,
+    activeAlerts: 0,
+    requestsCount: 1,
+    workload: "underworked",
+    workloadNote: "162h / 168h (-6h short) Mild below minimum threshold",
+  },
+  {
+    id: "10",
+    name: "Linda Davis",
+    role: "Department Manager",
+    department: "Administration",
+    code: "E010",
+    dailyRatio: 0.35,
+    weeklyRatio: 0.36,
+    monthlyRatio: 0.35,
+    dailyHours: 7.8,
+    dailyPatients: 21,
+    weeklyHours: 42,
+    weeklyPatients: 120,
+    hoursWorked: 170,
+    patientsTreated: 470,
+    activeAlerts: 3,
+    requestsCount: 5,
+    workload: "overworked",
+    workloadNote: "178h / 168h (+10h over) Above safe admin workload",
+  },
+];
+
+// fallback tính status nếu không set workload
+const getWorkloadStatus = (doc: DoctorSummary): WorkloadStatus => {
+  if (doc.workload) return doc.workload;
+  if (doc.monthlyRatio >= 0.3) return "overworked";
+  if (doc.monthlyRatio <= 0.23) return "underworked";
+  return "normal";
+};
+
+// =========================================================
 
 type TabKey = "status" | "schedule" | "performance";
 
@@ -210,17 +431,20 @@ const HomeView: React.FC = () => {
   const [onlyLate, setOnlyLate] = useState(false);
   const [onlyNotClocked, setOnlyNotClocked] = useState(false);
 
-  // lịch trong tuần:
-  // - ưu tiên đọc từ localStorage (medstaff_validation_schedule) => schedule đã publish
-  // - nếu chưa có publish thì dùng demo initialScheduleData
+  // REAL-TIME CLOCK
+  const [now, setNow] = useState<Date>(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  // schedule state
   const [schedule, setSchedule] = useState<ShiftSchedule[]>(() => {
     try {
       const saved = localStorage.getItem("medstaff_validation_schedule");
       if (saved) {
         const parsed = JSON.parse(saved) as ShiftSchedule[];
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {
       console.warn("Cannot parse medstaff_validation_schedule:", e);
@@ -236,23 +460,26 @@ const HomeView: React.FC = () => {
   );
 
   // toast
-  const [toast, setToast] = useState<{
-    title: string;
-    subtitle: string;
-  } | null>(null);
+  const [toast, setToast] = useState<{ title: string; subtitle: string } | null>(
+    null
+  );
 
-  // lưu số lượng pending + báo cho MainLayout cập nhật badge
+  // SUMMARY COUNTS
+  const totalStaffCount = workingStaff.length;
+  const activeStaffCount = workingStaff.filter(
+    (s) => s.status === "Active"
+  ).length;
+  const notStartedCount = workingStaff.filter(
+    (s) => s.status === "NotClocked"
+  ).length;
+
+  // lưu pending count cho MainLayout
   useEffect(() => {
     const pendingCount = schedule.filter((s) => s.status === "Pending").length;
-
-    // lưu vào localStorage
     localStorage.setItem("medstaff_pending_shifts", String(pendingCount));
-
-    // bắn event để sidebar đọc lại
     window.dispatchEvent(new Event("medstaff-pending-updated"));
   }, [schedule]);
 
-  // lưu lại toàn bộ schedule (kể cả khi bạn validate) để F5 vẫn giữ trạng thái
   useEffect(() => {
     localStorage.setItem(
       "medstaff_validation_schedule",
@@ -261,13 +488,16 @@ const HomeView: React.FC = () => {
   }, [schedule]);
 
   const visibleWorkingStaff = workingStaff.filter((s) => {
+    if (s.status === "NotClocked") return false;
     if (onlyLate) return s.status === "Late";
     return true;
   });
 
-  const handleFilterClick = () => {
-    setFiltersOpen(true);
-  };
+  const notClockedStaff = workingStaff.filter(
+    (s) => s.status === "NotClocked"
+  );
+
+  const handleFilterClick = () => setFiltersOpen(true);
 
   const handleSummaryClick = (type: "total" | "active" | "notStarted") => {
     setActiveTab("status");
@@ -286,9 +516,9 @@ const HomeView: React.FC = () => {
   const getDatesForWeek = () => {
     const dates: Date[] = [];
     for (let i = 0; i < 7; i++) {
-      const date = new Date(currentWeekStart);
-      date.setDate(date.getDate() + i);
-      dates.push(date);
+      const d = new Date(currentWeekStart);
+      d.setDate(d.getDate() + i);
+      dates.push(d);
     }
     return dates;
   };
@@ -305,9 +535,7 @@ const HomeView: React.FC = () => {
     setCurrentWeekStart(newDate);
   };
 
-  const formatDate = (date: Date) => {
-    return date.toISOString().split("T")[0];
-  };
+  const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
   const getShiftsForStaffAndDate = (staffId: string, date: Date) => {
     const dateStr = formatDate(date);
@@ -316,11 +544,10 @@ const HomeView: React.FC = () => {
     );
   };
 
-  // validate: đổi status -> Validated, đóng modal, show toast
   const handleValidateShift = () => {
     if (!selectedShift) return;
+    const shift = selectedShift;
 
-    const shift = selectedShift; // giữ lại cho toast
     setSchedule((prev) =>
       prev.map((s) =>
         s.id === shift.id ? { ...s, status: "Validated" } : s
@@ -332,13 +559,64 @@ const HomeView: React.FC = () => {
       title: `Shift validated for ${shift.staffName}`,
       subtitle: `${shift.shiftType} shift on ${shift.date}`,
     });
-
     setTimeout(() => setToast(null), 2500);
   };
 
+  // EXPORT PERFORMANCE CSV
+  const handleExportPerformance = () => {
+    const header = [
+      "Name",
+      "Role",
+      "Department",
+      "Code",
+      "DailyRatio",
+      "WeeklyRatio",
+      "MonthlyRatio",
+      "HoursWorked",
+      "PatientsTreated",
+      "ActiveAlerts",
+      "RequestsCount",
+      "Workload",
+    ];
+
+    const rows = doctorPerformanceData.map((d) => [
+      d.name,
+      d.role,
+      d.department,
+      d.code,
+      d.dailyRatio.toFixed(2),
+      d.weeklyRatio.toFixed(2),
+      d.monthlyRatio.toFixed(2),
+      d.hoursWorked,
+      d.patientsTreated,
+      d.activeAlerts,
+      d.requestsCount,
+      d.workload ?? "",
+    ]);
+
+    const csv = [header, ...rows]
+      .map((row) =>
+        row
+          .map((val) => `"${String(val).replace(/"/g, '""')}"`)
+          .join(",")
+      )
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "performance-report.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // ===== RENDER =====
   return (
     <div className="myteam-main-only">
-      {/* ===== HEADER ===== */}
+      {/* HEADER */}
       <header className="myteam-header">
         <div className="header-top">
           <div>
@@ -362,7 +640,7 @@ const HomeView: React.FC = () => {
             <div className="summary-icon summary-icon--muted">👤</div>
             <div>
               <div className="summary-label">Total Staff</div>
-              <div className="summary-value">{TOTAL_STAFF}</div>
+              <div className="summary-value">{totalStaffCount}</div>
             </div>
           </button>
 
@@ -376,7 +654,7 @@ const HomeView: React.FC = () => {
                 Active
               </div>
               <div className="summary-value summary-value--green">
-                {ACTIVE_STAFF}
+                {activeStaffCount}
               </div>
             </div>
           </button>
@@ -388,13 +666,13 @@ const HomeView: React.FC = () => {
             <div className="summary-icon summary-icon--muted">⏲</div>
             <div>
               <div className="summary-label">Not Started</div>
-              <div className="summary-value">{NOT_STARTED}</div>
+              <div className="summary-value">{notStartedCount}</div>
             </div>
           </button>
         </div>
       </header>
 
-      {/* ===== MAIN CONTENT ===== */}
+      {/* MAIN CONTENT */}
       <main className="myteam-content">
         {/* Tabs */}
         <div className="shift-tabs">
@@ -427,27 +705,60 @@ const HomeView: React.FC = () => {
           </button>
         </div>
 
-        {/* TAB: Currently Working */}
+        {/* TAB STATUS */}
         {activeTab === "status" && (
-          <section className="section section-working">
-            <div className="section-header section-header--green">
-              <div className="section-title-wrapper">
-                <div className="section-dot section-dot--green">✓</div>
-                <div className="section-title">
-                  Currently Working ({visibleWorkingStaff.length})
+          <>
+            {!onlyNotClocked && (
+              <section className="section section-working">
+                <div className="section-header section-header--green">
+                  <div className="section-title-wrapper">
+                    <div className="section-dot section-dot--green">✓</div>
+                    <div className="section-title">
+                      Currently Working ({visibleWorkingStaff.length})
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="section-body section-body--grid">
-              {visibleWorkingStaff.map((staff) => (
-                <StaffCard key={staff.id} staff={staff} />
-              ))}
-            </div>
-          </section>
+                <div className="section-body section-body--grid">
+                  {visibleWorkingStaff.map((staff) => (
+                    <StaffCard key={staff.id} staff={staff} now={now} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {notClockedStaff.length > 0 && (
+              <section className="section section-notclocked">
+                <div className="section-header section-header--grey">
+                  <div className="section-title-wrapper">
+                    <div className="section-title">
+                      Not Clocked In ({notClockedStaff.length})
+                    </div>
+                  </div>
+                </div>
+
+                <div className="section-body section-body--grid">
+                  {notClockedStaff.map((staff) => {
+                    const [startStr] = staff.shiftTime.split(" - ");
+                    const enrichedStaff: Staff = {
+                      ...staff,
+                      statusNote: `Starts at ${startStr}`,
+                    };
+                    return (
+                      <StaffCard
+                        key={staff.id}
+                        staff={enrichedStaff}
+                        now={now}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+          </>
         )}
 
-        {/* TAB: Team Schedule Overview */}
+        {/* TAB SCHEDULE */}
         {activeTab === "schedule" && (
           <section className="section">
             <div className="section-header section-header--grey">
@@ -468,10 +779,12 @@ const HomeView: React.FC = () => {
 
             <div className="section-body section-body--schedule">
               <div className="schedule-calendar">
-                {/* header hàng ngày */}
+                {/* header ngày */}
                 <div className="schedule-header">
                   <div className="staff-column-header">
-                    <div className="staff-count">Staff (5)</div>
+                    <div className="staff-count">
+                      Staff ({workingStaff.length})
+                    </div>
                   </div>
                   {getDatesForWeek().map((date, idx) => {
                     const isToday = formatDate(date) === "2025-11-30";
@@ -491,7 +804,6 @@ const HomeView: React.FC = () => {
                         <div className="date-number">{date.getDate()}</div>
                         {isToday && <div className="today-badge">Today</div>}
                         <div className="date-stats">
-                          {/* demo cứng 0/4 */}
                           <span className="date-stat">🟠 0/4</span>
                         </div>
                       </div>
@@ -499,7 +811,7 @@ const HomeView: React.FC = () => {
                   })}
                 </div>
 
-                {/* hàng nhân viên */}
+                {/* row staff */}
                 {workingStaff.map((staff) => (
                   <div key={staff.id} className="schedule-row">
                     <div className="staff-cell">
@@ -565,24 +877,72 @@ const HomeView: React.FC = () => {
           </section>
         )}
 
-        {/* TAB: Performance (demo) */}
+        {/* TAB PERFORMANCE – GRID NHIỀU CARD + EXPORT */}
         {activeTab === "performance" && (
-          <section className="section">
-            <div className="section-header section-header--grey">
-              <div className="section-title-wrapper">
-                <div className="section-title">Performance</div>
+          <section className="section section-performance">
+            {/* TOP BAR */}
+            <div className="perf-page-header">
+              <div className="perf-page-title">
+                <span className="perf-page-icon ">📊</span>
+                Performance Ratios: Hours Worked per Patient Treated
+              </div>
+
+              <div className="perf-page-actions">
+                <button className="perf-btn perf-btn-outline">
+                  <span className="perf-btn-icon">🔔</span>
+                  Alert Notification
+                </button>
+                <button
+                  className="perf-btn perf-btn-primary"
+                  onClick={handleExportPerformance}
+                >
+                  <span className="perf-btn-icon">⬇</span>
+                  Export Report
+                </button>
               </div>
             </div>
-            <div className="section-body">
-              <p>
-                Đây là nội dung demo cho tab <strong>Performance</strong>.
-              </p>
+
+            {/* GRID CARD */}
+            <div className="perf-grid">
+              {doctorPerformanceData.map((doc) => {
+                const status = getWorkloadStatus(doc);
+
+                return (
+                  <div
+                    key={doc.id}
+                    className={
+                      "perf-item " +
+                      (status === "overworked"
+                        ? "perf-item--overworked"
+                        : status === "underworked"
+                        ? "perf-item--underworked"
+                        : "")
+                    }
+                  >
+                    {/* chấm cảnh báo góc trên phải giống hình */}
+                    {status !== "normal" && (
+                      <div
+                        className={
+                          "perf-alert-dot " +
+                          (status === "overworked"
+                            ? "perf-alert-dot--red"
+                            : "perf-alert-dot--amber")
+                        }
+                      >
+                        !
+                      </div>
+                    )}
+
+                    <DoctorPerformanceModal doctor={doc} open />
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}
       </main>
 
-      {/* ===== FILTER PANEL ===== */}
+      {/* FILTER PANEL */}
       {filtersOpen && (
         <div
           className="filters-overlay"
@@ -640,7 +1000,7 @@ const HomeView: React.FC = () => {
         </div>
       )}
 
-      {/* ===== SHIFT DETAIL MODAL ===== */}
+      {/* SHIFT DETAIL MODAL */}
       {selectedShift && (
         <div
           className="filters-overlay"
@@ -761,7 +1121,7 @@ const HomeView: React.FC = () => {
         </div>
       )}
 
-      {/* ===== TOAST ===== */}
+      {/* TOAST */}
       {toast && (
         <div className="myteam-toast">
           <div className="myteam-toast-icon">✓</div>
@@ -777,13 +1137,70 @@ const HomeView: React.FC = () => {
   );
 };
 
-/* Card & status */
+// ===== Helpers & StaffCard =====
 type StaffCardProps = {
   staff: Staff;
+  now: Date;
   onClick?: () => void;
 };
 
-const StaffCard: React.FC<StaffCardProps> = ({ staff, onClick }) => {
+const parseShiftTimes = (shiftTime: string, now: Date) => {
+  const [startStr, endStr] = shiftTime.split(" - ");
+  const [sh, sm] = startStr.split(":").map((n) => Number(n) || 0);
+  const [eh, em] = endStr.split(":").map((n) => Number(n) || 0);
+
+  const start = new Date(now);
+  start.setHours(sh, sm, 0, 0);
+
+  const end = new Date(now);
+  end.setHours(eh, em, 0, 0);
+  if (end <= start) end.setDate(end.getDate() + 1);
+
+  return { start, end };
+};
+
+type TimingInfo = {
+  note: string;
+  isOvertime: boolean;
+  overtimeLabel: string;
+};
+
+const getTimingInfo = (staff: Staff, now: Date): TimingInfo => {
+  if (staff.status !== "Active") {
+    return {
+      note: staff.statusNote || "",
+      isOvertime: false,
+      overtimeLabel: "",
+    };
+  }
+
+  const { start, end } = parseShiftTimes(staff.shiftTime, now);
+  let workedMs = now.getTime() - start.getTime();
+  if (workedMs < 0) workedMs = 0;
+
+  const workedMinutes = Math.floor(workedMs / 60000);
+  const workedH = Math.floor(workedMinutes / 60);
+  const workedM = workedMinutes % 60;
+  const note = `Started ${workedH}h ${workedM}m ago`;
+
+  const overtimeMs = now.getTime() - end.getTime();
+  const isOvertime = overtimeMs > 0;
+
+  let overtimeLabel = "";
+  if (isOvertime) {
+    const overtimeMinutes = Math.floor(overtimeMs / 60000);
+    const oh = Math.floor(overtimeMinutes / 60);
+    const om = overtimeMinutes % 60;
+    overtimeLabel = `Overtime: ${oh}h ${om}m`;
+  }
+
+  return { note, isOvertime, overtimeLabel };
+};
+
+const StaffCard: React.FC<StaffCardProps> = ({ staff, now, onClick }) => {
+  const { note, isOvertime, overtimeLabel } = getTimingInfo(staff, now);
+  const isLate = staff.status === "Late";
+
   return (
     <div className="staff-card" onClick={onClick}>
       <div className="staff-card-left">
@@ -803,29 +1220,44 @@ const StaffCard: React.FC<StaffCardProps> = ({ staff, onClick }) => {
             </span>
           </div>
 
-          {staff.statusNote && (
+          {note && (
             <div
               className={
-                staff.status === "Late"
+                isLate
                   ? "staff-status-note staff-status-note--danger"
                   : "staff-status-note"
               }
             >
-              {staff.statusNote}
+              {note}
+            </div>
+          )}
+
+          {overtimeLabel && (
+            <div className="staff-overtime-pill">
+              <span className="overtime-icon">⚠</span>
+              <span>{overtimeLabel}</span>
             </div>
           )}
         </div>
       </div>
 
       <div className="staff-card-right">
-        <StatusPill state={staff.status} />
+        <StatusPill state={staff.status} isOvertime={isOvertime} />
       </div>
     </div>
   );
 };
 
-const StatusPill: React.FC<{ state: StaffState }> = ({ state }) => {
+const StatusPill: React.FC<{ state: StaffState; isOvertime?: boolean }> = ({
+  state,
+  isOvertime,
+}) => {
   if (state === "Active") {
+    if (isOvertime) {
+      return (
+        <div className="status-pill status-pill--muted">Shift Ended</div>
+      );
+    }
     return <div className="status-pill status-pill--active">Active</div>;
   }
   if (state === "Late") {

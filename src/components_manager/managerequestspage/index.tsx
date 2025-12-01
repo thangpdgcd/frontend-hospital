@@ -56,10 +56,10 @@ type DayOffRequest = BaseRequest & {
   kind: "dayOff";
   leaveBalanceDays: number;
   timeOff: {
-    startDateLabel: string; // Saturday, 29/11/2025
-    endDateLabel: string; // Sunday, 30/11/2025
-    durationLabel: string; // 2 days (16 hours)
-    summaryLabel: string; // Saturday - Sunday (2 days)
+    startDateLabel: string;
+    endDateLabel: string;
+    durationLabel: string;
+    summaryLabel: string;
   };
   affectedShifts: DayOffAffectedShift[];
   reason: string;
@@ -79,6 +79,7 @@ type ReplacementDoctor = {
 
 type TypeFilter = "all" | RequestKind;
 type StatusFilter = "all" | RequestStatus;
+type DepartmentFilter = "all" | "Cardiology" | "Emergency" | "ICU";
 
 const replacementDoctors: ReplacementDoctor[] = [
   {
@@ -186,7 +187,7 @@ const initialRequests: ShiftRequest[] = [
       },
     ],
     reason: "Family vacation",
-    additionalNote: '“Planning a weekend trip with family”',
+    additionalNote: "Planning a weekend trip with family.",
   },
   {
     id: "r4",
@@ -240,10 +241,10 @@ const initialRequests: ShiftRequest[] = [
 
 type ModalStep =
   | null
-  | "view" // main detail modal
-  | "assignPrompt" // Assign replacement?
-  | "assignDoctor" // doctor list
-  | "manualEditor"; // schedule editor
+  | "view"
+  | "assignPrompt"
+  | "assignDoctor"
+  | "manualEditor";
 
 const getInitials = (name: string) => {
   const parts = name.split(" ");
@@ -253,6 +254,155 @@ const getInitials = (name: string) => {
     parts[parts.length - 1].charAt(0).toUpperCase()
   );
 };
+
+/* ===== Additional Shift Modal (giống screenshot Additional Shift Request) ===== */
+
+type AdditionalShiftModalProps = {
+  open: boolean;
+  request: AdditionalShiftRequest;
+  onClose: () => void;
+  onApprove: () => void;
+  onDecline: () => void;
+};
+
+const AdditionalShiftModal: React.FC<AdditionalShiftModalProps> = ({
+  open,
+  request,
+  onClose,
+  onApprove,
+  onDecline,
+}) => {
+  if (!open) return null;
+
+  const initials = getInitials(request.doctorName);
+
+  const remainingHours = Math.max(
+    request.monthlyHours.required - request.monthlyHours.current,
+    0
+  );
+
+  const progressPct =
+    request.monthlyHours.required > 0
+      ? Math.min(
+          Math.round(
+            (request.monthlyHours.current / request.monthlyHours.required) *
+              100
+          ),
+          100
+        )
+      : 0;
+
+  const statusLabel =
+    request.status === "Pending"
+      ? "Pending"
+      : request.status === "Approved"
+      ? "Approved"
+      : "Declined";
+
+  return (
+    <div className="mr-modal-overlay" onClick={onClose}>
+      <div
+        className="mr-modal mr-modal-large"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button className="mr-modal-close" onClick={onClose}>
+          ✕
+        </button>
+
+        {/* HEADER */}
+        <div className="mr-modal-header mr-modal-header--light">
+          <div className="mr-modal-avatar-row">
+            <div className="mr-modal-avatar mr-modal-avatar--blue">
+              {initials}
+            </div>
+            <div>
+              <div className="mr-modal-title-main">
+                Additional Shift Request
+              </div>
+              <div className="mr-modal-sub-title">
+                {request.doctorName} · {request.doctorTitle} ·{" "}
+                {request.department}
+              </div>
+            </div>
+          </div>
+          <div className="mr-modal-status-pill">{statusLabel}</div>
+        </div>
+
+        {/* BODY */}
+        <div className="mr-modal-body">
+          <div className="mr-additional-top">
+            {/* Requested Shift Details */}
+            <div className="mr-additional-shift-box">
+              <div className="mr-additional-label">Requested Shift Details</div>
+              <div className="mr-additional-date">
+                {request.requestedShift.dateLabel}
+              </div>
+              <div className="mr-additional-main">
+                <span>{request.requestedShift.time}</span> ·{" "}
+                <span>{request.requestedShift.hours}</span>
+              </div>
+              <div className="mr-additional-location">
+                📍 {request.requestedShift.location}
+              </div>
+            </div>
+
+            {/* Monthly Hours Status */}
+            <div className="mr-additional-hours-box">
+              <div className="mr-additional-label">Monthly Hours Status</div>
+              <div className="mr-hours-grid">
+                <div>
+                  <div className="mr-hours-caption">Current Hours</div>
+                  <div className="mr-hours-value">
+                    {request.monthlyHours.current}h of{" "}
+                    {request.monthlyHours.required}h required
+                  </div>
+                </div>
+                <div>
+                  <div className="mr-hours-caption">Hours Needed</div>
+                  <div className="mr-hours-value">
+                    {remainingHours}h to meet requirement
+                  </div>
+                </div>
+              </div>
+              <div className="mr-hours-progress">
+                <div
+                  className="mr-hours-bar"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Reason */}
+          <div className="mr-reason-block">
+            <div className="mr-reason-label">Reason for Request</div>
+            <div className="mr-reason-text">{request.reason}</div>
+          </div>
+
+          {/* Additional Note nếu có */}
+          {request.additionalNote && (
+            <div className="mr-reason-block">
+              <div className="mr-reason-label">Additional Note</div>
+              <div className="mr-reason-text">{request.additionalNote}</div>
+            </div>
+          )}
+        </div>
+
+        {/* FOOTER */}
+        <div className="mr-modal-footer">
+          <button className="mr-btn mr-btn-primary" onClick={onApprove}>
+            ✓ Approve Additional Shift
+          </button>
+          <button className="mr-btn mr-btn-danger" onClick={onDecline}>
+            ✕ Decline Request
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ===================== MAIN PAGE ===================== */
 
 const ManageRequestsPage: React.FC = () => {
   const [requests, setRequests] = useState<ShiftRequest[]>(() => {
@@ -271,6 +421,8 @@ const ManageRequestsPage: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [departmentFilter, setDepartmentFilter] =
+    useState<DepartmentFilter>("all");
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [modalStep, setModalStep] = useState<ModalStep>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -280,7 +432,7 @@ const ManageRequestsPage: React.FC = () => {
     [activeRequestId, requests]
   );
 
-  // Lưu requests + pending count → localStorage (để dùng cho badge)
+  // Save to localStorage + pending count for sidebar badge
   useEffect(() => {
     localStorage.setItem("medstaff_shift_requests", JSON.stringify(requests));
     const pendingCount = requests.filter((r) => r.status === "Pending").length;
@@ -288,7 +440,19 @@ const ManageRequestsPage: React.FC = () => {
     window.dispatchEvent(new Event("medstaff-requests-updated"));
   }, [requests]);
 
-  // lọc danh sách theo search + filter
+  const showToast = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 2500);
+  };
+
+  const removeActiveAndToast = (message: string) => {
+    if (!activeRequest) return;
+    setRequests((prev) => prev.filter((r) => r.id !== activeRequest.id));
+    setActiveRequestId(null);
+    setModalStep(null);
+    showToast(message);
+  };
+
   const filteredRequests = useMemo(() => {
     return requests.filter((r) => {
       if (
@@ -299,9 +463,11 @@ const ManageRequestsPage: React.FC = () => {
       }
       if (typeFilter !== "all" && r.kind !== typeFilter) return false;
       if (statusFilter !== "all" && r.status !== statusFilter) return false;
+      if (departmentFilter !== "all" && r.department !== departmentFilter)
+        return false;
       return true;
     });
-  }, [requests, searchText, typeFilter, statusFilter]);
+  }, [requests, searchText, typeFilter, statusFilter, departmentFilter]);
 
   const pendingCount = requests.filter((r) => r.status === "Pending").length;
 
@@ -316,20 +482,11 @@ const ManageRequestsPage: React.FC = () => {
   };
 
   const handleValidateChangeRequest = () => {
-    // step: show Assign Replacement? modal
     setModalStep("assignPrompt");
   };
 
   const handleSkipReplacement = () => {
-    if (!activeRequest) return;
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === activeRequest.id ? { ...r, status: "Approved" } : r
-      )
-    );
-    closeAllModals();
-    setToast("Shift change request approved.");
-    setTimeout(() => setToast(null), 2500);
+    removeActiveAndToast("Shift change request approved.");
   };
 
   const handleGoAssignReplacement = () => {
@@ -337,20 +494,7 @@ const ManageRequestsPage: React.FC = () => {
   };
 
   const handleAssignDoctor = (doc: ReplacementDoctor) => {
-    if (!activeRequest) return;
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === activeRequest.id
-          ? {
-              ...r,
-              status: "Approved",
-            }
-          : r
-      )
-    );
-    closeAllModals();
-    setToast(`Assigned ${doc.name} as replacement.`);
-    setTimeout(() => setToast(null), 2500);
+    removeActiveAndToast(`Assigned ${doc.name} as replacement.`);
   };
 
   const handleOpenManualEditor = () => {
@@ -358,63 +502,27 @@ const ManageRequestsPage: React.FC = () => {
   };
 
   const handleSaveManualSchedule = () => {
-    if (!activeRequest) return;
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === activeRequest.id ? { ...r, status: "Approved" } : r
-      )
-    );
-    closeAllModals();
-    setToast("Schedule updated and request approved.");
-    setTimeout(() => setToast(null), 2500);
+    removeActiveAndToast("Schedule updated and request approved.");
   };
 
   const handleApproveAdditional = () => {
     if (!activeRequest || activeRequest.kind !== "additionalShift") return;
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === activeRequest.id ? { ...r, status: "Approved" } : r
-      )
-    );
-    closeAllModals();
-    setToast("Additional shift approved.");
-    setTimeout(() => setToast(null), 2500);
+    removeActiveAndToast("Additional shift approved.");
   };
 
   const handleDeclineAdditional = () => {
     if (!activeRequest || activeRequest.kind !== "additionalShift") return;
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === activeRequest.id ? { ...r, status: "Declined" } : r
-      )
-    );
-    closeAllModals();
-    setToast("Request declined.");
-    setTimeout(() => setToast(null), 2500);
+    removeActiveAndToast("Request declined.");
   };
 
   const handleApproveDayOff = () => {
     if (!activeRequest || activeRequest.kind !== "dayOff") return;
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === activeRequest.id ? { ...r, status: "Approved" } : r
-      )
-    );
-    closeAllModals();
-    setToast("Day off approved.");
-    setTimeout(() => setToast(null), 2500);
+    removeActiveAndToast("Day off approved.");
   };
 
   const handleDeclineDayOff = () => {
     if (!activeRequest || activeRequest.kind !== "dayOff") return;
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === activeRequest.id ? { ...r, status: "Declined" } : r
-      )
-    );
-    closeAllModals();
-    setToast("Day off request declined.");
-    setTimeout(() => setToast(null), 2500);
+    removeActiveAndToast("Day off request declined.");
   };
 
   return (
@@ -472,81 +580,123 @@ const ManageRequestsPage: React.FC = () => {
             <option value="Approved">Approved</option>
             <option value="Declined">Declined</option>
           </select>
+
+          <select
+            value={departmentFilter}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setDepartmentFilter(e.target.value as DepartmentFilter)
+            }
+          >
+            <option value="all">All Departments</option>
+            <option value="Cardiology">Cardiology</option>
+            <option value="Emergency">Emergency</option>
+            <option value="ICU">ICU</option>
+          </select>
         </div>
       </section>
 
       {/* LIST */}
       <section className="mr-list">
-        {filteredRequests.map((req) => (
-          <article key={req.id} className="mr-card">
-            <div className="mr-card-main">
-              <div className="mr-avatar" data-type={req.kind}>
-                {getInitials(req.doctorName)}
+        {filteredRequests.map((req) => {
+          const typeLabel =
+            req.kind === "shiftChange"
+              ? "Shift Change"
+              : req.kind === "additionalShift"
+              ? "Additional Shift"
+              : "Day Off";
+
+          const typeClass = `mr-badge-type mr-badge-type--${req.kind}`;
+
+          const statusLabel =
+            req.status === "Pending"
+              ? "Pending Approval"
+              : req.status === "Approved"
+              ? "Approved"
+              : "Declined";
+
+          const statusClass =
+            req.status === "Pending"
+              ? "mr-status mr-status--pending"
+              : req.status === "Approved"
+              ? "mr-status mr-status--approved"
+              : "mr-status mr-status--declined";
+
+          let summary: string;
+          if (req.kind === "shiftChange") {
+            const fromLabel = req.currentShift.shiftLabel
+              .replace("Shift", "")
+              .trim()
+              .toLowerCase();
+            const toLabel = req.requestedShift.shiftLabel
+              .replace("Shift", "")
+              .trim()
+              .toLowerCase();
+
+            summary = `${req.currentShift.dayLabel.toLowerCase()} ${fromLabel} shift → ${req.requestedShift.dayLabel.toLowerCase()} ${toLabel} shift`;
+          } else if (req.kind === "additionalShift") {
+            const day = req.requestedShift.dateLabel.split(",")[0];
+            const shiftLabel = req.requestedShift.shiftLabel
+              .replace("Shift", "")
+              .trim()
+              .toLowerCase();
+            summary = `${day}, ${shiftLabel} shift (${req.requestedShift.time})`;
+          } else {
+            summary = req.timeOff.summaryLabel;
+          }
+
+          return (
+            <article key={req.id} className="mr-card">
+              {/* LEFT */}
+              <div className="mr-card-left">
+                <div
+                  className={`mr-kind-icon mr-kind-icon--${req.kind}`}
+                  aria-hidden
+                >
+                  {req.kind === "shiftChange"
+                    ? "⟳"
+                    : req.kind === "additionalShift"
+                    ? "+"
+                    : "☂"}
+                </div>
+
+                <div className="mr-avatar" data-type={req.kind}>
+                  {getInitials(req.doctorName)}
+                </div>
+
+                <div className="mr-card-info">
+                  <div className="mr-card-name-row">
+                    <div className="mr-card-name">{req.doctorName}</div>
+                  </div>
+                  <div className="mr-card-role">
+                    {req.doctorTitle} · {req.department}
+                  </div>
+                  <div className="mr-card-summary">{summary}</div>
+                  <div className="mr-status-row">
+                    <span className={statusClass}>{statusLabel}</span>
+                  </div>
+                </div>
               </div>
-              <div className="mr-card-info">
-                <div className="mr-card-name-row">
-                  <div className="mr-card-name">{req.doctorName}</div>
-                  <span
-                    className={`mr-badge-type mr-badge-type--${req.kind}`}
-                  >
-                    {req.kind === "shiftChange"
-                      ? "Shift Change"
-                      : req.kind === "additionalShift"
-                      ? "Additional Shift"
-                      : "Day Off"}
+
+              {/* RIGHT */}
+              <div className="mr-card-right">
+                <div className="mr-card-right-top">
+                  <span className={typeClass}>{typeLabel}</span>
+                  <span className="mr-date-label">
+                    {new Date(req.createdAt).toLocaleDateString("en-GB")}
                   </span>
                 </div>
-                <div className="mr-card-role">
-                  {req.doctorTitle} · {req.department}
-                </div>
-
-                <div className="mr-card-summary">
-                  {req.kind === "shiftChange" ? (
-                    <>
-                      {req.currentShift.dayLabel.toLowerCase()}{" "}
-                      {req.currentShift.shiftLabel.toLowerCase()} →{" "}
-                      {req.requestedShift.dayLabel.toLowerCase()}{" "}
-                      {req.requestedShift.shiftLabel.toLowerCase()}
-                    </>
-                  ) : req.kind === "additionalShift" ? (
-                    <>
-                      {req.requestedShift.dateLabel} ·{" "}
-                      {req.requestedShift.shiftLabel.toLowerCase()} (
-                      {req.requestedShift.time})
-                    </>
-                  ) : (
-                    <>
-                      {req.timeOff.summaryLabel}
-                    </>
-                  )}
+                <div className="mr-card-right-bottom">
+                  <button
+                    className="mr-view-btn"
+                    onClick={() => openRequestDetails(req.id)}
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
-            </div>
-
-            <div className="mr-card-side">
-              <div className="mr-card-side-top">
-                <span
-                  className={`mr-status mr-status--${req.status.toLowerCase()}`}
-                >
-                  {req.status === "Pending"
-                    ? "Pending Approval"
-                    : req.status === "Approved"
-                    ? "Approved"
-                    : "Declined"}
-                </span>
-                <span className="mr-date-label">
-                  {new Date(req.createdAt).toLocaleDateString("en-GB")}
-                </span>
-              </div>
-              <button
-                className="mr-view-btn"
-                onClick={() => openRequestDetails(req.id)}
-              >
-                👁 View Details
-              </button>
-            </div>
-          </article>
-        ))}
+            </article>
+          );
+        })}
 
         {filteredRequests.length === 0 && (
           <div className="mr-empty">No requests match your filters.</div>
@@ -578,8 +728,7 @@ const ManageRequestsPage: React.FC = () => {
                     </div>
                     <div className="mr-modal-sub-title">
                       {activeRequest.doctorName} ·{" "}
-                      {activeRequest.doctorTitle} ·{" "}
-                      {activeRequest.department}
+                      {activeRequest.doctorTitle} · {activeRequest.department}
                     </div>
                   </div>
                 </div>
@@ -619,9 +768,7 @@ const ManageRequestsPage: React.FC = () => {
 
                 <div className="mr-reason-block">
                   <div className="mr-reason-label">Reason for Request</div>
-                  <div className="mr-reason-text">
-                    {activeRequest.reason}
-                  </div>
+                  <div className="mr-reason-text">{activeRequest.reason}</div>
                 </div>
               </div>
 
@@ -722,16 +869,14 @@ const ManageRequestsPage: React.FC = () => {
                 </div>
                 <div className="mr-pill-context">
                   {activeRequest.currentShift.shiftLabel} ·{" "}
-                  {activeRequest.currentShift.time} ·{" "}
-                  {activeRequest.department}
+                  {activeRequest.currentShift.time} · {activeRequest.department}
                 </div>
               </div>
 
               <div className="mr-modal-body">
                 <div className="mr-replacement-list">
                   {replacementDoctors.map((doc) => {
-                    const needs =
-                      doc.requiredHours - doc.monthlyHours;
+                    const needs = doc.requiredHours - doc.monthlyHours;
                     return (
                       <div key={doc.id} className="mr-replacement-row">
                         <div className="mr-replacement-left">
@@ -760,8 +905,7 @@ const ManageRequestsPage: React.FC = () => {
                               className="mr-hours-bar"
                               style={{
                                 width: `${
-                                  (doc.monthlyHours / doc.requiredHours) *
-                                  100
+                                  (doc.monthlyHours / doc.requiredHours) * 100
                                 }%`,
                               }}
                             />
@@ -808,7 +952,7 @@ const ManageRequestsPage: React.FC = () => {
           </div>
         )}
 
-      {/* MANUAL SCHEDULE EDITOR (simple demo) */}
+      {/* MANUAL SCHEDULE EDITOR */}
       {activeRequest &&
         activeRequest.kind === "shiftChange" &&
         modalStep === "manualEditor" && (
@@ -826,8 +970,8 @@ const ManageRequestsPage: React.FC = () => {
                 </div>
                 <div className="mr-modal-sub-title">
                   Editing schedule for {activeRequest.doctorName} (
-                  {activeRequest.department}). Hover over shifts and adjust
-                  as needed.
+                  {activeRequest.department}). Hover over shifts and adjust as
+                  needed.
                 </div>
               </div>
 
@@ -885,127 +1029,17 @@ const ManageRequestsPage: React.FC = () => {
           </div>
         )}
 
-      {/* ADDITIONAL SHIFT REQUEST MODAL */}
+      {/* ADDITIONAL SHIFT REQUEST MODAL (dùng component riêng) */}
       {activeRequest &&
         activeRequest.kind === "additionalShift" &&
         modalStep === "view" && (
-          <div className="mr-modal-overlay" onClick={closeAllModals}>
-            <div
-              className="mr-modal mr-modal-large"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button className="mr-modal-close" onClick={closeAllModals}>
-                ✕
-              </button>
-              <div className="mr-modal-header mr-modal-header--light">
-                <div className="mr-modal-avatar-row">
-                  <div className="mr-modal-avatar mr-modal-avatar--blue">
-                    {getInitials(activeRequest.doctorName)}
-                  </div>
-                  <div>
-                    <div className="mr-modal-title-main">
-                      Additional Shift Request
-                    </div>
-                    <div className="mr-modal-sub-title">
-                      {activeRequest.doctorName} ·{" "}
-                      {activeRequest.doctorTitle} ·{" "}
-                      {activeRequest.department}
-                    </div>
-                  </div>
-                </div>
-                <div className="mr-modal-status-pill">Pending</div>
-              </div>
-
-              <div className="mr-modal-body">
-                <div className="mr-additional-top">
-                  <div className="mr-additional-shift-box">
-                    <div className="mr-additional-label">
-                      Requested Shift Details
-                    </div>
-                    <div className="mr-additional-date">
-                      {activeRequest.requestedShift.dateLabel}
-                    </div>
-                    <div className="mr-additional-main">
-                      <span>{activeRequest.requestedShift.time}</span> ·{" "}
-                      <span>{activeRequest.requestedShift.hours}</span>
-                    </div>
-                    <div className="mr-additional-location">
-                      📍 {activeRequest.requestedShift.location}
-                    </div>
-                  </div>
-
-                  <div className="mr-additional-hours-box">
-                    <div className="mr-additional-label">
-                      Monthly Hours Status
-                    </div>
-                    <div className="mr-hours-grid">
-                      <div>
-                        <div className="mr-hours-caption">
-                          Current Hours
-                        </div>
-                        <div className="mr-hours-value">
-                          {activeRequest.monthlyHours.current}h of{" "}
-                          {activeRequest.monthlyHours.required}h required
-                        </div>
-                      </div>
-                      <div>
-                        <div className="mr-hours-caption">Hours Needed</div>
-                        <div className="mr-hours-value">
-                          {activeRequest.monthlyHours.required -
-                            activeRequest.monthlyHours.current}
-                          h to meet requirement
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mr-hours-progress">
-                      <div
-                        className="mr-hours-bar"
-                        style={{
-                          width: `${
-                            (activeRequest.monthlyHours.current /
-                              activeRequest.monthlyHours.required) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mr-reason-block">
-                  <div className="mr-reason-label">Reason for Request</div>
-                  <div className="mr-reason-text">
-                    {activeRequest.reason}
-                  </div>
-                </div>
-
-                {"additionalNote" in activeRequest &&
-                  activeRequest.additionalNote && (
-                    <div className="mr-reason-block">
-                      <div className="mr-reason-label">Additional Note</div>
-                      <div className="mr-reason-text">
-                        {activeRequest.additionalNote}
-                      </div>
-                    </div>
-                  )}
-              </div>
-
-              <div className="mr-modal-footer">
-                <button
-                  className="mr-btn mr-btn-primary"
-                  onClick={handleApproveAdditional}
-                >
-                  ✓ Approve Additional Shift
-                </button>
-                <button
-                  className="mr-btn mr-btn-danger"
-                  onClick={handleDeclineAdditional}
-                >
-                  ✕ Decline Request
-                </button>
-              </div>
-            </div>
-          </div>
+          <AdditionalShiftModal
+            open={true}
+            request={activeRequest}
+            onClose={closeAllModals}
+            onApprove={handleApproveAdditional}
+            onDecline={handleDeclineAdditional}
+          />
         )}
 
       {/* DAY OFF REQUEST MODAL */}
@@ -1026,13 +1060,10 @@ const ManageRequestsPage: React.FC = () => {
                     {getInitials(activeRequest.doctorName)}
                   </div>
                   <div>
-                    <div className="mr-modal-title-main">
-                      Day Off Request
-                    </div>
+                    <div className="mr-modal-title-main">Day Off Request</div>
                     <div className="mr-modal-sub-title">
                       {activeRequest.doctorName} ·{" "}
-                      {activeRequest.doctorTitle} ·{" "}
-                      {activeRequest.department}
+                      {activeRequest.doctorTitle} · {activeRequest.department}
                     </div>
                   </div>
                   <div className="mr-leave-balance">
@@ -1044,7 +1075,6 @@ const ManageRequestsPage: React.FC = () => {
               </div>
 
               <div className="mr-modal-body">
-                {/* Requested time off */}
                 <div className="mr-dayoff-timeoff">
                   <div className="mr-dayoff-timeoff-row">
                     <div className="mr-dayoff-timeoff-col">
@@ -1068,7 +1098,6 @@ const ManageRequestsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Affected shifts */}
                 <div className="mr-dayoff-affected">
                   <div className="mr-dayoff-label">
                     Affected Shifts ({activeRequest.affectedShifts.length})
@@ -1096,12 +1125,9 @@ const ManageRequestsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Reason + note */}
                 <div className="mr-reason-block">
                   <div className="mr-reason-label">Reason for Leave</div>
-                  <div className="mr-reason-text">
-                    {activeRequest.reason}
-                  </div>
+                  <div className="mr-reason-text">{activeRequest.reason}</div>
                 </div>
 
                 {activeRequest.additionalNote && (

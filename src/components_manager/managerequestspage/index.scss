@@ -1,0 +1,921 @@
+/* ========== RESET / WRAPPER ========== */
+.mr-wrapper {
+    min-height: 100vh;
+    padding: 24px 32px 40px;
+    background: #f3f6fb;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    color: #0f172a;
+}
+
+/* ========== HEADER ========== */
+
+.mr-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.mr-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.mr-header-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    background: radial-gradient(circle at 20% 20%, #5eead4, #0ea5e9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #ffffff;
+    box-shadow: 0 16px 40px rgba(14, 165, 233, 0.45);
+}
+
+.mr-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.mr-subtitle {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.mr-header-right {
+    display: flex;
+    align-items: center;
+}
+
+.mr-pending-chip {
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    outline: none;
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 13px;
+    background: #d1fae5;
+    color: #047857;
+    cursor: default;
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.25);
+}
+
+/* ========== FILTER BAR ========== */
+
+.mr-filters {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.mr-search {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+}
+
+.mr-search-icon {
+    font-size: 14px;
+    color: #9ca3af;
+}
+
+.mr-search input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 13px;
+}
+
+.mr-filter-selects {
+    display: flex;
+    gap: 10px;
+}
+
+.mr-filter-selects select {
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: #111827;
+}
+
+/* ========== LIST + CARD LAYOUT ========== */
+
+.mr-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* card */
+.mr-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 16px;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 16px 26px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+}
+
+/* LEFT: square icon + avatar + text */
+.mr-card-left {
+    display: flex;
+    align-items: center;
+    gap: 27px;
+    flex: 1;
+}
+
+/* square icon theo loại request */
+.mr-kind-icon {
+    width: 45px;
+    height: 44px;
+    border-radius: 12px;
+    text-align: center;
+    padding-top: 8px;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 20px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
+}
+
+.mr-kind-icon--shiftChange {
+    background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+}
+
+/* Additional Shift – gradient xanh dương giống hình 2 */
+.mr-kind-icon--additionalShift {
+    background: linear-gradient(135deg, #3b82f6, #4f46e5);
+    box-shadow: 0 10px 26px rgba(59, 130, 246, 0.45);
+}
+
+/* Day Off – gradient hồng tím  */
+.mr-kind-icon--dayOff {
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    box-shadow: 0 10px 26px rgba(236, 72, 153, 0.45);
+}
+
+/* avatar tròn chồng lên */
+.mr-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 999px;
+    background: #06b6d4;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 18px;
+    position: relative;
+    margin-left: -12px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+}
+
+.mr-avatar[data-type="shiftChange"] {
+    background: #06b6d4;
+}
+
+.mr-avatar[data-type="additionalShift"] {
+    background: #0ea5e9;
+}
+
+.mr-avatar[data-type="dayOff"] {
+    background: #a855f7;
+}
+
+.mr-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mr-card-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mr-card-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.mr-card-role {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* thanh summary dài màu xám nhạt */
+.mr-card-summary {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #111827;
+    padding: 9px 14px;
+    border-radius: 12px;
+    background: #f9fafb;
+    width: 100%;
+}
+
+/* status row dưới summary – giống hình thứ 2 */
+.mr-status-row {
+    margin-top: 8px;
+}
+
+/* pill type (bên phải) */
+.mr-badge-type {
+    font-size: 11px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    border: 1px solid;
+}
+
+.mr-badge-type--shiftChange {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #166534;
+}
+
+.mr-badge-type--additionalShift {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+}
+
+.mr-badge-type--dayOff {
+    background: #f9f5ff;
+    border-color: #e9d5ff;
+    color: #7c3aed;
+}
+
+/* RIGHT SIDE */
+.mr-card-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 190px;
+}
+
+.mr-card-right-top {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.mr-date-label {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.mr-card-right-bottom {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* status pill */
+.mr-status {
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
+.mr-status--pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.mr-status--approved {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.mr-status--declined {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* nút View Details */
+.mr-view-btn {
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1px solid #10b981;
+    background: #ecfdf3;
+    color: #047857;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.mr-view-btn::before {
+    content: "👁";
+    font-size: 13px;
+}
+
+/* empty */
+.mr-empty {
+    text-align: center;
+    padding: 40px 0;
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+/* ========== MODAL OVERLAY ========== */
+
+.mr-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 40;
+}
+
+/* ========== MODAL ========== */
+
+.mr-modal {
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.mr-modal-large {
+    width: 760px;
+}
+
+.mr-modal-small {
+    width: 480px;
+}
+
+.mr-modal-close {
+    position: absolute;
+    right: 18px;
+    top: 16px;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* header chung */
+.mr-modal-header {
+    padding: 20px 24px 18px;
+    border-radius: 24px 24px 0 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* gradient cho shift change detail */
+.mr-modal-header--gradient {
+    background: linear-gradient(135deg, #e0f9ff, #f5fff8);
+}
+
+/* gradient cho assign doctor */
+.mr-modal-header--blue {
+    background: linear-gradient(135deg, #0ea5e9, #22c55e);
+    color: #f9fafb;
+}
+
+/* header light (additional / day off) */
+.mr-modal-header--light {
+    background: #f9fafb;
+}
+
+/* teal header (manual editor) */
+.mr-modal-header--teal {
+    background: linear-gradient(135deg, #14b8a6, #4ade80);
+    color: white;
+}
+
+.mr-modal-avatar-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.mr-modal-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    background: #22c55e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.mr-modal-avatar--blue {
+    background: #2563eb;
+}
+
+.mr-modal-avatar--purple {
+    background: #a855f7;
+}
+
+.mr-modal-title-main {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.mr-modal-sub-title {
+    margin-top: 2px;
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+.mr-modal-status-pill {
+    margin-left: auto;
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.mr-leave-balance {
+    margin-left: auto;
+    text-align: right;
+    font-size: 11px;
+}
+
+.mr-leave-balance strong {
+    display: block;
+}
+
+/* nội dung modal */
+.mr-modal-body {
+    padding: 18px 24px 20px;
+    overflow-y: auto;
+}
+
+/* footer modal */
+.mr-modal-footer {
+    padding: 12px 24px 18px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mr-modal-footer--right {
+    justify-content: flex-end;
+}
+
+/* buttons */
+.mr-btn {
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+}
+
+.mr-btn-primary {
+    background: #22c55e;
+    color: #ffffff;
+}
+
+.mr-btn-ghost {
+    background: #ffffff;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+}
+
+.mr-btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.mr-btn-sm {
+    padding: 5px 12px;
+    font-size: 12px;
+}
+
+/* ========== SHIFT CHANGE DETAIL LAYOUT ========== */
+
+.mr-two-columns {
+    display: grid;
+    grid-template-columns: 1.4fr 40px 1.4fr;
+    gap: 10px;
+    align-items: stretch;
+    margin-bottom: 16px;
+}
+
+.mr-shift-box {
+    border-radius: 18px;
+    padding: 14px 16px;
+    border: 1px solid transparent;
+}
+
+.mr-shift-box-label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 6px;
+}
+
+.mr-shift-box-day {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.mr-shift-box-type {
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.mr-shift-box-time {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* màu box current/requested */
+.mr-shift-box--current {
+    background: #fef9c3;
+    border-color: #facc15;
+}
+
+.mr-shift-box--requested {
+    background: #ccfbf1;
+    border-color: #22c55e;
+}
+
+.mr-shift-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #9ca3af;
+}
+
+/* reason block */
+.mr-reason-block {
+    margin-top: 10px;
+}
+
+.mr-reason-label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.mr-reason-text {
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #f9fafb;
+    color: #111827;
+}
+
+/* ========== ASSIGN REPLACEMENT PROMPT ========== */
+
+.mr-unassigned-box {
+    margin: 10px 24px 10px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: #f9fafb;
+    border: 1px dashed #cbd5f5;
+}
+
+.mr-unassigned-day {
+    font-weight: 600;
+}
+
+.mr-unassigned-type {
+    font-size: 13px;
+}
+
+.mr-unassigned-time {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 2px;
+}
+
+.mr-unassigned-dept {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* ========== ASSIGN REPLACEMENT DOCTOR LIST ========== */
+
+.mr-pill-context {
+    align-self: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: rgba(15, 23, 42, 0.16);
+    color: #f9fafb;
+}
+
+.mr-replacement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mr-replacement-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 2fr) auto;
+    gap: 16px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: #f9fafb;
+}
+
+.mr-replacement-left {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.mr-replacement-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: #e0f2fe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #0369a1;
+}
+
+.mr-replacement-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.mr-replacement-title {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.mr-replacement-middle {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: center;
+}
+
+.mr-hours-row {
+    font-size: 12px;
+    color: #4b5563;
+}
+
+.mr-hours-progress {
+    height: 5px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    overflow: hidden;
+}
+
+.mr-hours-bar {
+    height: 100%;
+    background: #22c55e;
+}
+
+.mr-hours-note {
+    font-size: 12px;
+}
+
+.mr-hours-danger {
+    color: #b91c1c;
+}
+
+.mr-hours-ok {
+    color: #15803d;
+}
+
+.mr-replacement-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 8px;
+}
+
+.mr-availability-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #ecfdf3;
+    color: #15803d;
+}
+
+/* ========== MANUAL EDITOR GRID ========== */
+
+.mr-manual-grid {
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    background: #f9fafb;
+}
+
+.mr-manual-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.mr-manual-row--header {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.mr-manual-row--days span {
+    font-size: 12px;
+    text-align: center;
+    padding: 6px 0;
+    color: #6b7280;
+}
+
+.mr-manual-row--shifts .mr-manual-shift {
+    font-size: 11px;
+    padding: 8px 6px;
+    text-align: center;
+}
+
+.mr-manual-shift--empty {
+    background: transparent;
+}
+
+.mr-manual-shift--morning {
+    background: #fef3c7;
+}
+
+.mr-manual-shift--evening {
+    background: #e0f2fe;
+}
+
+.mr-manual-shift--night {
+    background: #ede9fe;
+}
+
+/* ========== DAY OFF SECTIONS ========== */
+
+.mr-dayoff-timeoff {
+    margin-bottom: 12px;
+}
+
+.mr-dayoff-timeoff-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.mr-dayoff-timeoff-col {
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #f9fafb;
+}
+
+.mr-dayoff-label {
+    font-size: 11px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.mr-dayoff-value {
+    font-size: 13px;
+}
+
+.mr-dayoff-affected {
+    margin-bottom: 12px;
+}
+
+.mr-dayoff-affected-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.mr-dayoff-affected-item {
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #f9fafb;
+    display: flex;
+    justify-content: space-between;
+}
+
+.mr-dayoff-affected-date {
+    font-size: 13px;
+}
+
+.mr-dayoff-affected-meta {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.mr-dayoff-affected-dept {
+    font-size: 12px;
+    color: #4b5563;
+}
+
+.mr-dayoff-replacement-note {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #b45309;
+}
+
+/* ========== ADDITIONAL SHIFT ========== */
+
+.mr-additional-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.7fr);
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.mr-additional-label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.mr-additional-shift-box,
+.mr-additional-hours-box {
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: #f9fafb;
+}
+
+.mr-additional-date {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.mr-additional-main {
+    font-size: 13px;
+}
+
+.mr-additional-location {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.mr-hours-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.mr-hours-caption {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.mr-hours-value {
+    font-size: 12px;
+}
+
+/* ========== TOAST ========== */
+
+.mr-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 50;
+}
+
+.mr-toast-content {
+    background: #111827;
+    color: #f9fafb;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.6);
+}
